@@ -1,5 +1,6 @@
 package io.maxiplux.tdd.config.security.auth;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,10 +17,14 @@ import org.springframework.security.oauth2.provider.token.TokenEnhancerChain;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
 import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 
+import java.security.*;
+import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Arrays;
+import java.util.Base64;
 
 @Configuration
 @EnableAuthorizationServer
+@Slf4j
 public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
 
     @Autowired
@@ -39,6 +44,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 
     @Value("${security.token.time.to.live}")
     private Integer tokeTimeToLive;
+    private Base64.Encoder encoder = Base64.getEncoder();
 
     @Override
     public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
@@ -75,9 +81,28 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     @Bean
     public JwtAccessTokenConverter accessTokenConverter() {
         JwtAccessTokenConverter jwtAccessTokenConverter = new JwtAccessTokenConverter();
-        jwtAccessTokenConverter.setSigningKey(JwtConfig.RSA_PRIVADA);
-        jwtAccessTokenConverter.setVerifierKey(JwtConfig.RSA_PUBLICA);
+
+
+        jwtAccessTokenConverter.setKeyPair(this.GenerateKeyPair());
         return jwtAccessTokenConverter;
+    }
+    public  KeyPair GenerateKeyPair()
+    {
+
+        KeyPairGenerator generator = null;
+        KeyPair pair = null;
+        try {
+            generator = KeyPairGenerator.getInstance("RSA");
+
+            generator.initialize(2048, new SecureRandom());
+            pair = generator.generateKeyPair();
+
+        } catch (NoSuchAlgorithmException e) {
+            log.error("Error al generar las llaves RSA {}", e.getMessage());
+            throw new RuntimeException(e);
+        }
+
+        return pair;
     }
 
 
