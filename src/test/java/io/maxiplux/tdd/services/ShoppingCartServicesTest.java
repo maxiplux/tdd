@@ -22,15 +22,21 @@ public class ShoppingCartServicesTest {
     public ShoppingCartRepository shoppingCartRepository;
 
 
+    @InjectMocks
+    ShoppingCartServicesImpl shoppingCartServicesRealMock;
+
+
     /* @Mock
 
-    @InjectMocks
+    @InjectMocks // Se inject las concretas en la clase a testear
     private ShoppingCartServices shoppingCartServices;
     */
 
     @BeforeEach
     void initService() {
-
+        MockitoAnnotations.openMocks(this);
+        //shoppingCartRepository = mock(ShoppingCartRepositoryImpl.class);
+        //shoppingCartServices = new ShoppingCartServicesImpl(shoppingCartRepository);Mo
 
     }
 
@@ -43,12 +49,12 @@ public class ShoppingCartServicesTest {
     {
 
 
-        ShoppingCartServices shoppingCartServices = new ShoppingCartServicesImpl(ShoppingCartRepositoryImpl.getInstance());
+        ShoppingCartServices shoppingCartServicesReal = new ShoppingCartServicesImpl(ShoppingCartRepositoryImpl.getInstance());
 
-        shoppingCartServices.addItem(Product.builder().id(1L).name("Product 1").build());
-        shoppingCartServices.addItem(Product.builder().id(2L).name("Product 2").build());
-        shoppingCartServices.getCurrentCartSize();
-        Assert.assertEquals(2, shoppingCartServices.getCurrentCartSize());
+        shoppingCartServicesReal.addItem(Product.builder().id(1L).name("Product 1").build());
+        shoppingCartServicesReal.addItem(Product.builder().id(2L).name("Product 2").build());
+        shoppingCartServicesReal.getCurrentCartSize();
+        Assert.assertEquals(2, shoppingCartServicesReal.getCurrentCartSize());
     }
 
     @Test
@@ -59,12 +65,31 @@ public class ShoppingCartServicesTest {
         Mockito.when(shoppingCartRepository.getCurrentCartSize()).thenReturn(2);
 
 
-        ShoppingCartServices shoppingCartServices = new ShoppingCartServicesImpl(shoppingCartRepository);
+        ShoppingCartServices shoppingCartServicesReal = new ShoppingCartServicesImpl(shoppingCartRepository);
 
-        shoppingCartServices.addItem(Product.builder().id(1L).name("Product 1").build());
-        shoppingCartServices.addItem(Product.builder().id(2L).name("Product 2").build());
-        shoppingCartServices.getCurrentCartSize();
-        Assert.assertEquals(2, shoppingCartServices.getCurrentCartSize());
+        shoppingCartServicesReal.addItem(Product.builder().id(1L).name("Product 1").build());
+        shoppingCartServicesReal.addItem(Product.builder().id(2L).name("Product 2").build());
+        shoppingCartServicesReal.getCurrentCartSize();
+        Assert.assertEquals(2, shoppingCartServicesReal.getCurrentCartSize());
+        Mockito.verify(shoppingCartRepository, Mockito.times(2)).addItem(Mockito.any(Product.class));
+        Mockito.verify(shoppingCartRepository, Mockito.atLeast(1)).getCurrentCartSize();
+
+    }
+
+    @Test
+    public void testAddItemInjectMock()
+    {
+        //ShoppingCartRepository shoppingCartRepository = Mockito.mock(ShoppingCartRepository.class);
+        Mockito.doNothing().when(shoppingCartRepository).addItem(Mockito.any(Product.class));
+        Mockito.when(shoppingCartRepository.getCurrentCartSize()).thenReturn(2);
+
+
+
+
+        shoppingCartServicesRealMock.addItem(Product.builder().id(1L).name("Product 1").build());
+        shoppingCartServicesRealMock.addItem(Product.builder().id(2L).name("Product 2").build());
+        shoppingCartServicesRealMock.getCurrentCartSize();
+        Assert.assertEquals(2, shoppingCartServicesRealMock.getCurrentCartSize());
         Mockito.verify(shoppingCartRepository, Mockito.times(2)).addItem(Mockito.any(Product.class));
         Mockito.verify(shoppingCartRepository, Mockito.atLeast(1)).getCurrentCartSize();
 
