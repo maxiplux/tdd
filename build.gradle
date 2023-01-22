@@ -60,6 +60,10 @@ dependencies {
 // https://mvnrepository.com/artifact/com.h2database/h2
     testImplementation group: 'com.h2database', name: 'h2', version: '2.1.214'
 
+// https://mvnrepository.com/artifact/org.mockito/mockito-core
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '5.0.0'
+    testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: '5.0.0'
+
 
 }
 
