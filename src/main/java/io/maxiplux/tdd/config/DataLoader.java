@@ -1,9 +1,11 @@
 package io.maxiplux.tdd.config;
 
 
+import io.maxiplux.tdd.models.Post;
 import io.maxiplux.tdd.models.users.Role;
 import io.maxiplux.tdd.models.users.RoleName;
 import io.maxiplux.tdd.models.users.User;
+import io.maxiplux.tdd.repositories.PostRepository;
 import io.maxiplux.tdd.repositories.RoleRepository;
 import io.maxiplux.tdd.repositories.UserRepository;
 import org.jeasy.random.EasyRandom;
@@ -39,6 +41,9 @@ public class DataLoader implements ApplicationRunner {
 
     @Autowired
     private RoleRepository roleRepository;
+
+    @Autowired
+    private PostRepository postRepository;
 
 
 
@@ -81,6 +86,7 @@ public class DataLoader implements ApplicationRunner {
         if (this.shouldItCreateData)
         {
             this.createUser();
+            this.createPost();
 
         }
 
@@ -100,11 +106,14 @@ public class DataLoader implements ApplicationRunner {
         user.setEnabled(true);
         user.setRoles((List<Role>) this.roleRepository.findAll());
         this.userRepository.save(user);
+    }
 
-
+    private void createPost() {
+          List<Post> posts = IntStream.range(0, 500)
+                 .mapToObj(i -> factory.nextObject(Post.class))
+                 .collect(Collectors.toList());
+            this.postRepository.saveAll(posts);
 
 
     }
-
-
 }
